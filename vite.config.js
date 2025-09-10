@@ -4,6 +4,7 @@ import { resolve } from "path";
 import { copyFileSync, existsSync } from "fs";
 
 export default defineConfig({
+  base: "./", // 👈 dòng này bắt buộc để dùng đường dẫn tương đối khi deploy
   plugins: [
     react(),
     {
