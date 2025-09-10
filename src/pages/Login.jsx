@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
@@ -11,38 +9,34 @@ export default function Login() {
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (e) => {
+  const onSubmit = (e) => {
     e.preventDefault();
     if (loading) return;
 
     setErr("");
     setMsg("");
-
     const em = email.trim().toLowerCase();
-    if (!em || !pw) {
-      setErr("Please enter both email and password.");
-      return;
-    }
 
     try {
       setLoading(true);
-      await signInWithEmailAndPassword(auth, em, pw);
+
+      // Lấy danh sách user từ localStorage
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+
+      // Tìm user
+      const user = users.find(u => u.email === em && u.password === pw);
+      if (!user) {
+        setErr("Invalid email or password.");
+        return;
+      }
+
+      // Lưu current user
+      localStorage.setItem("currentUser", JSON.stringify(user));
+
       setMsg("Login successful! Redirecting to Home...");
       setTimeout(() => nav("/home"), 1000);
     } catch (e) {
-      console.error("[Login] failed:", e?.code, e?.message);
-      const code = e?.code || "";
-      if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
-        setErr("Invalid email or password.");
-      } else if (code === "auth/user-not-found") {
-        setErr("No account found with this email.");
-      } else if (code === "auth/too-many-requests") {
-        setErr("Too many attempts. Please try again later.");
-      } else if (code === "auth/invalid-email") {
-        setErr("Invalid email format.");
-      } else {
-        setErr(e?.message?.replace("Firebase: ", "") || "Login failed.");
-      }
+      setErr("Login failed.");
     } finally {
       setLoading(false);
     }
