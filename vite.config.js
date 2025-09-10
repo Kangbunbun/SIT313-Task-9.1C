@@ -19,5 +19,9 @@ export default defineConfig({
         }
       }
     }
-  ]
+  ],
+  build: {
+    outDir: "dist",   // đảm bảo output nằm trong dist
+    emptyOutDir: true // xoá sạch dist trước khi build
+  }
 });
